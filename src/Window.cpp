@@ -5,6 +5,9 @@ Cube cube(5.0f);
 OBJObject bunny;
 OBJObject dragon;
 OBJObject bear;
+OBJObject* activeObject;
+
+int pointSize = 1;
 
 int Window::width;
 int Window::height;
@@ -13,6 +16,10 @@ int Window::height;
 void Window::initialize_objects()
 {
 	bunny.parse("resources/models/bunny.obj");
+	dragon.parse("resources/models/dragon.obj");
+	bear.parse("resources/models/bear.obj");
+
+	activeObject = &bunny;
 }
 
 void Window::clean_up()
@@ -65,15 +72,17 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	// Load the identity matrix
 	glLoadIdentity();
 	// Set the perspective of the projection viewing frustum
+	//gluPerspective(60.0, double(width) / (double)height, 1.0, 1000.0);
 	perspectiveGL(60.0, double(width) / (double)height, 1.0, 1000.0);
 	// Move camera back 20 units so that it looks at the origin (or else it's in the origin)
-	glTranslatef(0, 0, -20);
+	glTranslatef(0, 0, -5);
 }
 
 void Window::idle_callback()
 {
 	// Perform any updates as necessary. Here, we will spin the cube slightly.
-	cube.update();
+	//cube.update();
+	activeObject->update();
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -84,9 +93,12 @@ void Window::display_callback(GLFWwindow* window)
 	glMatrixMode(GL_MODELVIEW);
 	// Load the identity matrix
 	glLoadIdentity();
-	
+
+	glPointSize(pointSize);
 	// Render objects
-	cube.draw();
+	//cube.draw();
+
+	activeObject->draw();
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -104,6 +116,34 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+		if (key == GLFW_KEY_F1)
+		{
+			activeObject = &bunny;
+		}
+		if (key == GLFW_KEY_F2)
+		{
+			activeObject = &dragon;
+		}
+		if (key == GLFW_KEY_F3)
+		{
+			activeObject = &bear;
+		}
+		if (key == GLFW_KEY_P)
+		{
+			//capital P
+			if (mods == GLFW_MOD_SHIFT )
+			{
+				pointSize--;
+				if(pointSize < 1)
+				{
+					pointSize = 1;
+				}
+			}
+			else
+			{
+				pointSize++;
+			}
 		}
 	}
 }

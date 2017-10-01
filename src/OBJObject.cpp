@@ -13,46 +13,44 @@ OBJObject::OBJObject(const char *filepath)
 
 void OBJObject::parse(const char *filepath) 
 {
-	FILE* fp;     // file pointer
 	float vx, vy, vz;  // vertex coordinates
 	float vnx, vny, vnz;  // vertex normals
 	float r,g,b;  // vertex color
-	int c1,c2;    // characters read from file
-	char str [64];
+	std::string firstToken;
+	//debug counter
+#ifdef NDEBUG
+	int counter = 0;
+#endif
 
-	fp = fopen(filepath,"rb");  // make the file name configurable so you can load other files
-	if (fp==NULL)
+	std::ifstream file(filepath);
+	std::string line;
+	while ( std::getline(file, line) )
 	{
-		std::cerr << "error loading file" << std::endl;
-		exit(-1);
-	}  // just in case the file can't be found or is corrupt
+		std::istringstream iss(line);
+		iss >> firstToken;
 
-	//TODO: error prone, does this count as any error in the parser?
-	while( !feof(fp) )
-	{
-		c1 = fgetc(fp);
-		c2 = fgetc(fp);
-		if (c1=='v' && c2==' ')
+#ifdef NDEBUG
+		counter++;
+		std::cout << "line " << counter << ": " << line << std::endl;
+#endif
+
+		if (firstToken == "v")
 		{
-			fscanf(fp, "%f %f %f %f %f %f", &vx, &vy, &vz, &r, &g, &b);
+			iss >> vx >> vy >> vz;// >> r >> g >> b;
 			vertices.push_back( glm::vec3(vx,vy,vz) );
 			//TODO: store colors
 		}
-		else if (c1=='v' && c2=='n')
+		else if (firstToken == "vn")
 		{
-			fscanf(fp, "%f %f %f", &vnx, &vny, &vnz);
-			vertices.push_back( glm::vec3(vnx,vny,vnz) );
+			iss >> vnx >> vny >> vnz;
+			normals.push_back( glm::vec3(vnx,vny,vnz) );
 		}
-		else
+		else if(firstToken == "f")
 		{
-			fgets(str, 64, fp);
+			//NOTE: Optimization we don't care about the rest of the file
+			break;
 		}
 	}
-
-	fclose(fp);   // make sure you don't forget to close the file when done
-
-	//TODO parse the OBJ file
-	// Populate the face indices, vertices, and normals vectors with the OBJ Object data
 }
 
 void OBJObject::draw() 
@@ -68,10 +66,27 @@ void OBJObject::draw()
 	for (unsigned int i = 0; i < vertices.size(); ++i) 
 	{
 		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
+//Assignment 3. Change color depending on normal
+		glm::vec3 norm = glm::normalize( normals[i] );
+		glColor3f(norm.x, norm.y, norm.z);
 	}
 	glEnd();
 
 	// Pop the save state off the matrix stack
 	// This will undo the multiply we did earlier
 	glPopMatrix();
+}
+
+void OBJObject::update()
+{
+	spin(1.0f);
+}
+
+//Private Functions
+void OBJObject::spin(float deg)
+{
+	this->angle += deg;
+	if (this->angle > 360.0f || this->angle < -360.0f) this->angle = 0.0f;
+	// This creates the matrix to rotate the cube
+	this->toWorld = glm::rotate(glm::mat4(1.0f), this->angle / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
 }

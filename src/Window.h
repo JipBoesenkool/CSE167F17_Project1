@@ -30,7 +30,7 @@ public:
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 private:
 	//replacement for gluPerspective
-	// https://stackoverflow.com/questions/12943164/replacement-for-gluperspective-with-glfrustrum
+	//https://stackoverflow.com/questions/12943164/replacement-for-gluperspective-with-glfrustrum
 	static void perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar );
 };
 
