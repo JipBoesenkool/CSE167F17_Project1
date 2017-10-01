@@ -79,14 +79,60 @@ void OBJObject::draw()
 
 void OBJObject::update()
 {
-	spin(1.0f);
+	//update data for rendering
+	automaticRotation();
+	glm::mat4 transform(1);
+	transform = glm::translate(transform, position);
+	transform = glm::rotate(transform, this->angle / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+	transform = glm::scale(transform, glm::vec3(this->scale));
+	this->toWorld = transform;
 }
 
-//Private Functions
-void OBJObject::spin(float deg)
+void OBJObject::move(glm::vec3 direction)
+{
+	position += direction;
+}
+
+void OBJObject::rotate(float deg)
 {
 	this->angle += deg;
 	if (this->angle > 360.0f || this->angle < -360.0f) this->angle = 0.0f;
-	// This creates the matrix to rotate the cube
-	this->toWorld = glm::rotate(glm::mat4(1.0f), this->angle / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+void OBJObject::automaticRotation()
+{
+	if(rotateCooldown > 0)
+	{
+		rotateCooldown -= 1;
+	}
+	else
+	{
+		rotate(1.0f);
+	}
+}
+
+void OBJObject::manualRotation(float deg)
+{
+	rotateCooldown = 60;
+	rotate(deg);
+}
+
+void OBJObject::scaleObject(bool scaleUp)
+{
+	(scaleUp) ? scale *= 2 : scale /= 2;
+}
+
+void OBJObject::resetPosition()
+{
+	this->position = glm::vec3(0);
+}
+
+void OBJObject::resetRotation()
+{
+	this->angle = 0.0f;
+}
+
+void OBJObject::resetScale()
+{
+	this->scale = 1.0f;
 }

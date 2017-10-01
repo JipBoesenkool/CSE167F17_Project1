@@ -1,6 +1,6 @@
 #include "Window.h"
 
-const char* window_title = "GLFW Starter Project";
+const char* window_title = "CSE167 - Assignment 1";
 Cube cube(5.0f);
 OBJObject bunny;
 OBJObject dragon;
@@ -75,7 +75,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	//gluPerspective(60.0, double(width) / (double)height, 1.0, 1000.0);
 	perspectiveGL(60.0, double(width) / (double)height, 1.0, 1000.0);
 	// Move camera back 20 units so that it looks at the origin (or else it's in the origin)
-	glTranslatef(0, 0, -5);
+	glTranslatef(0, 0, -20);
 }
 
 void Window::idle_callback()
@@ -129,6 +129,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			activeObject = &bear;
 		}
+//3. Rendering the Points with OpenGL (20 Points) (point size)
 		if (key == GLFW_KEY_P)
 		{
 			//capital P
@@ -145,17 +146,63 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				pointSize++;
 			}
 		}
+//4. Manipulating the Points (20 Points)
+		//Translation
+		if (key == GLFW_KEY_X)
+		{
+			glm::vec3 dir;
+			(mods == GLFW_MOD_SHIFT) ? dir = glm::vec3(1,0,0) : dir = glm::vec3(-1,0,0);
+			activeObject->move(dir);
+		}
+		if (key == GLFW_KEY_Y)
+		{
+			glm::vec3 dir;
+			(mods == GLFW_MOD_SHIFT) ? dir = glm::vec3(0,1,0) : dir = glm::vec3(0,-1,0);
+			activeObject->move(dir);
+		}
+		if (key == GLFW_KEY_Z)
+		{
+			glm::vec3 dir;
+			(mods == GLFW_MOD_SHIFT) ? dir = glm::vec3(0,0,1) : dir = glm::vec3(0,0,-1);
+			activeObject->move(dir);
+		}
+		//Rotation
+		if (key == GLFW_KEY_O)
+		{
+			float deg;
+			(mods == GLFW_MOD_SHIFT) ? deg=-10.0f : deg=10.0f;
+			activeObject->manualRotation(deg);
+		}
+		//Scale
+		if (key == GLFW_KEY_S)
+		{
+			bool scaleUp;
+			(mods == GLFW_MOD_SHIFT) ? scaleUp = true : scaleUp = false;
+			activeObject->scaleObject(scaleUp);
+		}
+		//Reset transform
+		if (key == GLFW_KEY_R)
+		{
+			if(mods == GLFW_MOD_SHIFT)
+			{
+				activeObject->resetRotation();
+				activeObject->resetScale();
+			}
+			else
+			{
+				activeObject->resetPosition();
+			}
+		}
 	}
 }
 
 //Private functions
 void Window::perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar )
 {
-	const GLdouble pi = 3.1415926535897932384626433832795;
 	GLdouble fW, fH;
 
 	//fH = tan( (fovY / 2) / 180 * pi ) * zNear;
-	fH = tan( fovY / 360 * pi ) * zNear;
+	fH = tan( fovY / 360 * glm::pi<float>() ) * zNear;
 	fW = fH * aspect;
 
 	glFrustum( -fW, fW, -fH, fH, zNear, zFar );
