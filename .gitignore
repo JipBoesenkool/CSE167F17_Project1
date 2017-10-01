@@ -1,6 +1,7 @@
 #project ignore builds
 build/
 cmake-build-debug/
+lib/
 
 #c++ specific
 # Compiled Object files
@@ -72,6 +73,7 @@ cmake-build-debug/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
+.idea/
 
 # JIRA plugin
 atlassian-ide-plugin.xml
