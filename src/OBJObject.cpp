@@ -63,11 +63,15 @@ void OBJObject::draw()
 
 	glBegin(GL_POINTS);
 	// Loop through all the vertices of this OBJ Object and render them
+	glm::vec3 offset = glm::vec3(0.5f);
 	for (unsigned int i = 0; i < vertices.size(); ++i) 
 	{
 		glVertex3f(vertices[i].x, vertices[i].y, vertices[i].z);
 //Assignment 3. Change color depending on normal
+		// after normalize values are -1 to 1, convert them to 0, 1
 		glm::vec3 norm = glm::normalize( normals[i] );
+		norm = (offset * norm) + offset;
+		// -1 * 0.5 = -0.5 + 0.5 = 0, 1 * 0.5 = 0.5 + 0.5 = 1
 		glColor3f(norm.x, norm.y, norm.z);
 	}
 	glEnd();
