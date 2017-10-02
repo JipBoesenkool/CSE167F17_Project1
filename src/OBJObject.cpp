@@ -86,8 +86,12 @@ void OBJObject::update()
 	//update data for rendering
 	automaticRotation();
 	glm::mat4 transform(1);
+	//First rotate z around screen center
+	transform = glm::rotate(transform, this->rotation.z / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f));
+	//continue like normal
 	transform = glm::translate(transform, position);
-	transform = glm::rotate(transform, this->angle / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+	transform = glm::rotate(transform, this->rotation.x / 180.0f * glm::pi<float>(), glm::vec3(1.0f, 1.0f, 0.0f));
+	transform = glm::rotate(transform, this->rotation.y / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
 	transform = glm::scale(transform, glm::vec3(this->scale));
 	this->toWorld = transform;
 }
@@ -97,28 +101,24 @@ void OBJObject::move(glm::vec3 direction)
 	position += direction;
 }
 
-void OBJObject::rotate(float deg)
+void OBJObject::rotate(glm::vec3 rotation)
 {
-	this->angle += deg;
-	if (this->angle > 360.0f || this->angle < -360.0f) this->angle = 0.0f;
+	this->rotation += rotation;
+	if (this->rotation.x > 360.0f || this->rotation.x < -360.0f) this->rotation.x = 0.0f;
+	if (this->rotation.y > 360.0f || this->rotation.y < -360.0f) this->rotation.y = 0.0f;
+	if (this->rotation.z > 360.0f || this->rotation.z < -360.0f) this->rotation.z = 0.0f;
 }
 
 void OBJObject::automaticRotation()
 {
-	if(rotateCooldown > 0)
-	{
-		rotateCooldown -= 1;
-	}
-	else
-	{
-		rotate(1.0f);
-	}
+	glm::vec3 rotation = glm::vec3(0, 1.0f, 0);
+	rotate(rotation);
 }
 
 void OBJObject::manualRotation(float deg)
 {
-	rotateCooldown = 60;
-	rotate(deg);
+	glm::vec3 rotation = glm::vec3(0, 0, deg);
+	rotate(rotation);
 }
 
 void OBJObject::scaleObject(bool scaleUp)
@@ -133,7 +133,7 @@ void OBJObject::resetPosition()
 
 void OBJObject::resetRotation()
 {
-	this->angle = 0.0f;
+	this->rotation = glm::vec3(0);
 }
 
 void OBJObject::resetScale()

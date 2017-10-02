@@ -28,8 +28,7 @@ private:
 	std::vector<glm::vec3> normals;
 	glm::mat4 toWorld;
 	glm::vec3 position;
-	float angle;
-	int rotateCooldown = 0;
+	glm::vec3 rotation;
 	float scale = 1;
 
 //Functions
@@ -42,7 +41,7 @@ public:
 	void update();
 
 	void move(glm::vec3 direction);
-	void rotate(float deg);
+	void rotate(glm::vec3 rotation);
 	void manualRotation(float deg);
 	void automaticRotation();
 	void scaleObject(bool scaleUp);
