@@ -63,6 +63,7 @@ GLFWwindow* Window::create_window(int width, int height)
 
 void Window::resize_callback(GLFWwindow* window, int width, int height)
 {
+	glfwGetFramebufferSize(window, &width, &height);
 	Window::width = width;
 	Window::height = height;
 	// Set the viewport size
