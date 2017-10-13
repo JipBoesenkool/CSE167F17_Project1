@@ -22,11 +22,12 @@
 class OBJObject
 {
 //Members
-private:
+public:
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	glm::mat4 toWorld;
+private:
 	glm::vec3 position;
 	glm::vec3 rotation;
 	float scale = 1;

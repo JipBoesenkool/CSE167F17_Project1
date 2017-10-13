@@ -1,13 +1,17 @@
 #include "Window.h"
+#include "GLFW_Rasterizer.h"
+#include "OGL_Renderer.h"
 
 const char* window_title = "CSE167 - Assignment 1";
 Cube cube(5.0f);
-OBJObject bunny;
-OBJObject dragon;
-OBJObject bear;
-OBJObject* activeObject;
+OBJObject Window::bunny;
+OBJObject Window::dragon;
+OBJObject Window::bear;
+OBJObject* Window::activeObject;
+IRenderer* Window::p_currentRenderer;
+bool Window::rendererIsOgl;
 
-int pointSize = 1;
+int Window::pointSize = 1;
 
 int Window::width;
 int Window::height;
@@ -15,50 +19,11 @@ int Window::height;
 //Public functions
 void Window::initialize_objects()
 {
-	bunny.parse("resources/models/bunny.obj");
-	dragon.parse("resources/models/dragon.obj");
-	bear.parse("resources/models/bear.obj");
+	Window::bunny.parse("resources/models/bunny.obj");
+	Window::dragon.parse("resources/models/dragon.obj");
+	Window::bear.parse("resources/models/bear.obj");
 
-	activeObject = &bunny;
-}
-
-void Window::clean_up()
-{
-}
-
-GLFWwindow* Window::create_window(int width, int height)
-{
-	// Initialize GLFW.
-	if (!glfwInit())
-	{
-		fprintf(stderr, "Failed to initialize GLFW\n");
-		return NULL;
-	}
-
-	// 4x antialiasing
-	glfwWindowHint(GLFW_SAMPLES, 4);
-
-	// Create the GLFW window
-	GLFWwindow* window = glfwCreateWindow(width, height, window_title, NULL, NULL);
-
-	// Check if the window could not be created
-	if (!window)
-	{
-		fprintf(stderr, "Failed to open GLFW window.\n");
-		glfwTerminate();
-		return NULL;
-	}
-
-	// Make the context of the window
-	glfwMakeContextCurrent(window);
-
-	// Set swap interval to 1
-	glfwSwapInterval(1);
-
-	// Call the resize callback to make sure things get drawn immediately
-	Window::resize_callback(window, width, height);
-
-	return window;
+	Window::activeObject = &bunny;
 }
 
 void Window::resize_callback(GLFWwindow* window, int width, int height)
@@ -83,68 +48,79 @@ void Window::idle_callback()
 {
 	// Perform any updates as necessary. Here, we will spin the cube slightly.
 	//cube.update();
-	activeObject->update();
-}
-
-void Window::display_callback(GLFWwindow* window)
-{
-	// Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Set the matrix mode to GL_MODELVIEW
-	glMatrixMode(GL_MODELVIEW);
-	// Load the identity matrix
-	glLoadIdentity();
-
-	glPointSize(pointSize);
-	// Render objects
-	//cube.draw();
-
-	activeObject->draw();
-
-	// Gets events, including input such as keyboard and mouse or window resizing
-	glfwPollEvents();
-	// Swap buffers
-	glfwSwapBuffers(window);
+	Window::activeObject->update();
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	// Check for a key press
-	if (action == GLFW_PRESS)
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
 	{
-		// Check if escape was pressed
-		if (key == GLFW_KEY_ESCAPE)
+		if(action == GLFW_PRESS)
 		{
-			// Close the window. This causes the program to also terminate.
-			glfwSetWindowShouldClose(window, GL_TRUE);
+			// Check if escape was pressed
+			if (key == GLFW_KEY_ESCAPE)
+			{
+				// Close the window. This causes the program to also terminate.
+				glfwSetWindowShouldClose(window, GL_TRUE);
+			}
+			if (key == GLFW_KEY_F1)
+			{
+				Window::activeObject = &bunny;
+			}
+			if (key == GLFW_KEY_F2)
+			{
+				Window::activeObject = &dragon;
+			}
+			if (key == GLFW_KEY_F3)
+			{
+				Window::activeObject = &bear;
+			}
+			//Reset transform
+			if (key == GLFW_KEY_R)
+			{
+				if(mods == GLFW_MOD_SHIFT)
+				{
+					Window::activeObject->resetRotation();
+					Window::activeObject->resetScale();
+				}
+				else
+				{
+					Window::activeObject->resetPosition();
+				}
+			}
+			//Switch renderer
+			if (key == GLFW_KEY_M)
+			{
+				if(Window::rendererIsOgl)
+				{
+					std::cout << "RENDERER: switching to rasterizer." << std::endl;
+					Window::p_currentRenderer = GLFW_Rasterizer::Instance;
+				}
+				else
+				{
+					std::cout << "RENDERER: switching to OGL." << std::endl;
+					Window::p_currentRenderer = OGL_Renderer::Instance;
+				}
+				Window::p_currentRenderer->Setup();
+			}
 		}
-		if (key == GLFW_KEY_F1)
-		{
-			activeObject = &bunny;
-		}
-		if (key == GLFW_KEY_F2)
-		{
-			activeObject = &dragon;
-		}
-		if (key == GLFW_KEY_F3)
-		{
-			activeObject = &bear;
-		}
+
 //3. Rendering the Points with OpenGL (20 Points) (point size)
 		if (key == GLFW_KEY_P)
 		{
 			//capital P
 			if (mods == GLFW_MOD_SHIFT )
 			{
-				pointSize--;
-				if(pointSize < 1)
+				Window::pointSize--;
+				if(Window::pointSize < 1)
 				{
-					pointSize = 1;
+					Window::pointSize = 1;
 				}
 			}
 			else
 			{
-				pointSize++;
+				Window::pointSize++;
 			}
 		}
 //4. Manipulating the Points (20 Points)
@@ -153,46 +129,33 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			glm::vec3 dir;
 			(mods == GLFW_MOD_SHIFT) ? dir = glm::vec3(1,0,0) : dir = glm::vec3(-1,0,0);
-			activeObject->move(dir);
+			Window::activeObject->move(dir);
 		}
 		if (key == GLFW_KEY_Y)
 		{
 			glm::vec3 dir;
 			(mods == GLFW_MOD_SHIFT) ? dir = glm::vec3(0,1,0) : dir = glm::vec3(0,-1,0);
-			activeObject->move(dir);
+			Window::activeObject->move(dir);
 		}
 		if (key == GLFW_KEY_Z)
 		{
 			glm::vec3 dir;
 			(mods == GLFW_MOD_SHIFT) ? dir = glm::vec3(0,0,1) : dir = glm::vec3(0,0,-1);
-			activeObject->move(dir);
+			Window::activeObject->move(dir);
 		}
 		//Rotation
 		if (key == GLFW_KEY_O)
 		{
 			float deg;
 			(mods == GLFW_MOD_SHIFT) ? deg=-10.0f : deg=10.0f;
-			activeObject->manualRotation(deg);
+			Window::activeObject->manualRotation(deg);
 		}
 		//Scale
 		if (key == GLFW_KEY_S)
 		{
 			bool scaleUp;
 			(mods == GLFW_MOD_SHIFT) ? scaleUp = true : scaleUp = false;
-			activeObject->scaleObject(scaleUp);
-		}
-		//Reset transform
-		if (key == GLFW_KEY_R)
-		{
-			if(mods == GLFW_MOD_SHIFT)
-			{
-				activeObject->resetRotation();
-				activeObject->resetScale();
-			}
-			else
-			{
-				activeObject->resetPosition();
-			}
+			Window::activeObject->scaleObject(scaleUp);
 		}
 	}
 }
@@ -202,7 +165,6 @@ void Window::perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdo
 {
 	GLdouble fW, fH;
 
-	//fH = tan( (fovY / 2) / 180 * pi ) * zNear;
 	fH = tan( fovY / 360 * glm::pi<float>() ) * zNear;
 	fW = fH * aspect;
 

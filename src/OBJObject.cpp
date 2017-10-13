@@ -94,10 +94,34 @@ void OBJObject::update()
 	transform = glm::rotate(transform, this->rotation.y / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
 	transform = glm::scale(transform, glm::vec3(this->scale));
 	this->toWorld = transform;
+
+	/*
+		//update data for rendering
+		automaticRotation();
+		glm::mat4 transform(1);
+		glm::mat4 rotationMatrix = glm::rotate(transform, this->rotation.z / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, 1.0f) );
+
+		transform = glm::translate(transform, position);
+		transform = glm::rotate(transform, this->rotation.x / 180.0f * glm::pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
+		transform = glm::rotate(transform, this->rotation.y / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
+		//Rotate z axis around screen center
+		glm::mat4 currentTranslation = transform;
+		glm::mat4 inverseTranslation = glm::inverse(transform);
+		//move back to center
+		transform = transform * inverseTranslation;
+		//rotate
+		transform = transform * rotationMatrix;
+		//continue like normal
+		transform = currentTranslation * transform ;
+
+		transform = glm::scale(transform, glm::vec3(this->scale));
+		this->toWorld = transform;
+	 */
 }
 
 void OBJObject::move(glm::vec3 direction)
 {
+
 	position += direction;
 }
 

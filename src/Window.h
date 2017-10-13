@@ -15,15 +15,22 @@
 #include "Cube.h"
 
 #include "OBJObject.h"
+#include "IRenderer.h"
 
 class Window
 {
 public:
+	static OBJObject bunny;
+	static OBJObject dragon;
+	static OBJObject bear;
+	static OBJObject *activeObject;
+	static IRenderer *p_currentRenderer;
+	static bool rendererIsOgl;
+	static int pointSize;
 	static int width;
 	static int height;
 	static void initialize_objects();
-	static void clean_up();
-	static GLFWwindow* create_window(int width, int height);
+	//static GLFWwindow* create_window(int width, int height);
 	static void resize_callback(GLFWwindow* window, int width, int height);
 	static void idle_callback();
 	static void display_callback(GLFWwindow*);
